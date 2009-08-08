@@ -1,0 +1,65 @@
+= Transporter
+
+Deliver packages in multiple ways simultaneously (email, jabber, campfire, irc,
+etc.)
+
+== API
+
+    require "transporter"
+
+    module Transporter
+      class Email < Service
+        validate_config do |config|
+          config.has_keys      :from, :to, :host, :user, :password, :port, :auth
+          config.key_is_one_of :auth, %w(plain auth some other)
+          [:to, :from].each do |key|
+            config.key_matches key,   /--some complicated email regexp--/
+          end
+        end
+
+        def deliver(message)
+          # Send your email
+          #
+          # In this method you have available `message.short` (usable for short
+          # messages such as twitter, or email subjects) and `message.full`
+          # usable for longer chunks of text, as an email body.
+          #
+          # And you have access to `config`, where all your pre-validated config
+          # values live (including default values set on the class, this hash is
+          # a merged representations of te two.
+        end
+      end
+
+      register :email, Email
+    end
+
+== How to use
+
+You probably want one of the child projects of this one, where the different
+implementations provide you with specific implementations. However, the way to
+use this is as follows:
+
+    Transporter.deliver(
+      :message => {
+        :short => "cuack!",
+        :full => "double cuack" 
+      },
+      :using => {
+        :email => {
+          :to => "...", :from => "...", ...
+        },
+        :jabber => {
+          :to => "...", :from => "...", ...
+        }
+      }
+
+Where each key of the `:using` hash depends on what implementations you loaded.
+(`Transporter::Email`, `Transporter::Jabber`, etc). Refer to their specific
+documentations for the full list of configuration values in each.
+
+The `:short` message is used in messages like twitter, IM, or as an email
+subject. The `:full` message is used 
+
+== List of implementations
+
+* Example
